@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from huggingface_hub import PyTorchModelHubMixin, hf_hub_download
 
 from depth_anything.blocks import FeatureFusionBlock, _make_scratch
+from pathlib import Path
 
 
 def _make_fusion_block(features, use_bn, size = None):
@@ -141,10 +142,13 @@ class DPT_DINOv2(nn.Module):
         super(DPT_DINOv2, self).__init__()
         
         assert encoder in ['vits', 'vitb', 'vitl']
-        
+
+        depth_anything_root = Path(__file__).resolve().parents[1]
+        dinov2_path = depth_anything_root / "torchhub" / "facebookresearch_dinov2_main"
+
         # in case the Internet connection is not stable, please load the DINOv2 locally
         if localhub:
-            self.pretrained = torch.hub.load('torchhub/facebookresearch_dinov2_main', 'dinov2_{:}14'.format(encoder), source='local', pretrained=False)
+            self.pretrained = torch.hub.load(str(dinov2_path), 'dinov2_{:}14'.format(encoder), source='local', pretrained=False)
         else:
             self.pretrained = torch.hub.load('facebookresearch/dinov2', 'dinov2_{:}14'.format(encoder))
         
